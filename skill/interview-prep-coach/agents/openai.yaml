@@ -1,0 +1,5 @@
+interface:
+  display_name: "Interview Prep Coach"
+  short_description: "Plan and practice job interviews"
+  default_prompt: "Use $interview-prep-coach to analyze my resume against a job description and run a mock interview."
+

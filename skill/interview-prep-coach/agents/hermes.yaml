@@ -1,0 +1,13 @@
+# Lightweight adapter example for Hermes-style agent runtimes.
+# If your Hermes Agent build uses a different schema, map these fields to that
+# schema and keep ../SKILL.md as the source of truth.
+name: "interview-prep-coach"
+format: "skill-md"
+entrypoint: "../SKILL.md"
+description: "Interview preparation coach for resume/JD analysis, practice questions, mock interviews, and structured answer improvement."
+references:
+  - "../references/behavioral.md"
+  - "../references/technical.md"
+  - "../references/product.md"
+  - "../references/data.md"
+  - "../references/recruiter.md"
