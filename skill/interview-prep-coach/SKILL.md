@@ -1,126 +1,349 @@
 ---
 name: interview-prep-coach
-description: Use this skill when the user wants to prepare for job interviews, analyze a job description against their resume, generate interview practice questions, run mock interviews, improve behavioral answers with STAR structure, prepare company-specific talking points, or build a day-by-day interview preparation plan.
-metadata:
-  short-description: Interview preparation coach
+description: 当用户希望基于岗位说明和候选人背景或简历进行面试准备时使用本技能，输出岗位拆解、匹配度分析、职业规划建议、面试问题预测、面试反问问题、面试建议，以及针对岗位定制的1-2分钟中英文自我介绍。
 ---
 
-# Interview Prep Coach
+# 面试准备教练
 
-## Compatibility
+## 目标
 
-This skill is designed to work in Codex and other agent runtimes that can read a
-`SKILL.md` file. Keep the workflow portable:
+本技能用于帮助用户基于两个核心输入完成系统化面试准备：
 
-- Use plain Markdown outputs unless the user asks for another format.
-- Do not require platform-specific tools.
-- If files, web access, or calendars are available, treat them as optional.
-- Keep resume, compensation, and personal background details confidential.
-- Do not invent candidate experience. Reframe truthfully and call out gaps.
+1. 岗位说明，也就是岗位招聘信息、岗位描述或岗位要求。
+2. 候选人背景，包括简历、项目经历、领英简介、个人介绍或用户手写的经历总结。
 
-## Intake
+最终输出应是一份完整的面试准备报告，帮助候选人理解岗位真实含义、判断岗位是否值得应聘、识别自身优势和风险、准备高概率面试问题、设计反问问题，并生成贴合岗位的1-2分钟中文和英文自我介绍。
 
-Ask only for missing information that materially changes the preparation plan.
-Useful inputs:
+## 兼容性
 
-- Target role, level, company, and interview date.
-- Job description or recruiter notes.
-- Resume, LinkedIn summary, or project list.
-- Interview stage: recruiter screen, hiring manager, technical, case, panel, or
-  final round.
-- Time available: same-day, 2-3 days, 1 week, or longer.
-- Candidate concerns: weak area, career gap, job change, compensation, language,
-  confidence, or a specific interviewer.
+本 `SKILL.md` 面向 Hermes、OpenClaw、Codex 以及其他能够读取普通 Markdown 技能说明的智能体运行环境。
 
-When the user has not provided enough information, proceed with a default
-general preparation mode and list assumptions briefly.
+兼容性规则：
 
-## Core Workflow
+- 只使用标准 YAML 头部字段：`name` 和 `description`。
+- 所有操作说明都写在 Markdown 正文中。
+- 不依赖任何特定运行环境的工具、插件、接口或文件路径。
+- 如果运行环境提供联网搜索、文件读取或文档解析能力，可以作为辅助，但不能作为必需条件。
+- 如果用户提供简历、薪资、个人经历等隐私信息，只在当前任务中使用，不向外部泄露。
+- 不编造候选人的经历、数据、雇主、学历、证书或语言能力。
+- 如果岗位说明模糊或简历信息不足，需要明确说明假设和置信度。
 
-1. Build the role scorecard.
-   Identify the 5-8 capabilities the interviewer is likely to test. Separate
-   must-have signals from nice-to-have signals.
+## 触发场景
 
-2. Map evidence from the candidate.
-   Match resume/projects to the scorecard. Mark each area as strong, usable,
-   weak, or missing. Prefer concrete evidence: scope, decisions, metrics,
-   tradeoffs, collaboration, and outcomes.
+当用户提出以下需求时，应使用本技能：
 
-3. Identify interview risks.
-   Look for gaps between the job description and the candidate evidence. Create
-   truthful mitigation talking points and practice questions for each risk.
+- 准备面试。
+- 分析岗位说明。
+- 对比简历和岗位的匹配度。
+- 判断某个岗位是否适合自己。
+- 预测面试问题。
+- 准备反问面试官的问题。
+- 判断岗位是不是坑。
+- 写或优化1-2分钟自我介绍。
+- 生成中文和英文面试表达材料。
 
-4. Create a preparation plan.
-   Choose a plan length based on available time. Include daily work blocks for
-   knowledge review, answer drafting, mock practice, and final review.
+## 必需输入
 
-5. Practice in loops.
-   For mock interviews, ask one question at a time. Wait for the answer, then
-   continue with a realistic follow-up. Do not reveal the full evaluation until
-   the round is complete unless the user asks for coaching mode.
+理想输入格式如下：
 
-6. Deliver a final packet.
-   End with a concise pack containing target stories, likely questions,
-   high-risk answers, company talking points, and questions to ask the
-   interviewer.
+```text
+岗位说明：
+……
 
-## Modes
-
-Use the mode that best matches the user's request:
-
-- **JD/resume analysis**: scorecard, evidence map, gaps, and positioning.
-- **Preparation plan**: day-by-day tasks with priorities and practice blocks.
-- **Question bank**: likely questions grouped by interview round and skill.
-- **Answer repair**: rewrite one answer for clarity, credibility, and structure.
-- **Mock interview**: one question at a time, realistic follow-ups, final rubric.
-- **Story bank**: convert experience into reusable STAR/CAR stories.
-- **Final review**: short rehearsal sheet for the last 30-60 minutes.
-
-## Output Standards
-
-For analysis, prefer this structure:
-
-```markdown
-## Role Scorecard
-## Candidate Match
-## Risk Areas
-## Preparation Plan
-## Practice Questions
-## Final Review Pack
+候选人背景/简历：
+……
 ```
 
-For answer feedback, use:
+如果缺少输入：
+
+- 如果缺少岗位说明，先请用户提供岗位说明，或至少提供岗位名称、公司、级别和主要职责。
+- 如果缺少候选人背景，先请用户提供简历、项目总结或简短背景介绍。
+- 如果用户希望直接开始，也可以先产出可分析的部分，并把缺失信息相关内容标记为“基于假设”。
+
+在输出第一版报告前，最多只问三个澄清问题。不要因为信息不完美而无法推进。
+
+## 分析原则
+
+分析岗位说明时：
+
+- 区分明确写出的要求和隐藏的真实期待。
+- 从职责、工具、指标、汇报关系、岗位级别和业务背景中推断真实日常工作。
+- 同时识别岗位优点和隐含挑战。
+- 区分硬性要求、加分项和招聘话术。
+
+分析候选人背景时：
+
+- 用候选人的真实经历和项目证据匹配岗位要求。
+- 优先使用候选人的实际项目、技能、行业经验和成果。
+- 同时指出强匹配点和弱匹配点。
+- 对能力缺口保持诚实，但给出补救和表达策略。
+- 避免空泛夸奖。
+
+给建议时：
+
+- 直接、具体、可执行。
+- 帮助候选人判断岗位是否值得投入时间。
+- 说明这个岗位对未来职业发展的价值和风险。
+- 不只做分析，还要给出面试准备动作。
+
+## 输出语言
+
+默认使用中文输出。如果用户明确要求其他语言，可以按用户要求调整。
+
+第7部分的自我介绍必须同时提供中文版本和英文版本。英文版本只用于候选人面试表达，其他解释说明仍使用中文。
+
+使用清晰标题和有信息量的要点。避免空模板。每个判断都应对应岗位说明、候选人背景，或明确标注为合理假设。
+
+## 必需输出结构
+
+始终按以下顺序输出。
 
 ```markdown
-## Quick Verdict
-## What Works
-## What To Improve
-## Stronger Version
-## Follow-up Drill
+# 面试准备报告
+
+## 1. 岗位拆解
+
+### 1.1 岗位一句话理解
+
+### 1.2 职责拆解
+
+### 1.3 任职要求拆解
+
+### 1.4 岗位真实工作内容
+
+### 1.5 岗位优点
+
+### 1.6 岗位隐含挑战与难点
+
+## 2. 匹配度分析
+
+### 2.1 总体匹配度判断
+
+### 2.2 候选人优势
+
+### 2.3 候选人劣势与风险
+
+### 2.4 可迁移能力
+
+### 2.5 面试中需要重点证明的能力
+
+## 3. 岗位职业规划建议
+
+### 3.1 这个岗位的定位和价值
+
+### 3.2 是否匹配候选人
+
+### 3.3 是否值得应聘
+
+### 3.4 未来职业规划建议
+
+## 4. 面试问题预测
+
+### 4.1 简历深挖问题
+
+### 4.2 岗位能力问题
+
+### 4.3 行为面试问题
+
+### 4.4 业务/行业理解问题
+
+### 4.5 压力问题或风险问题
+
+## 5. 面试反问问题：判断这个岗位是不是坑
+
+### 5.1 关于岗位目标
+
+### 5.2 关于团队和汇报关系
+
+### 5.3 关于资源和协作
+
+### 5.4 关于绩效和晋升
+
+### 5.5 关于风险信号
+
+## 6. 面试建议
+
+### 6.1 面试表达策略
+
+### 6.2 需要重点准备的故事
+
+### 6.3 需要避免的表达
+
+### 6.4 面试前准备清单
+
+## 7. 1-2分钟自我介绍
+
+### 7.1 中文版本
+
+### 7.2 英文版本
+
+### 7.3 自我介绍使用建议
 ```
 
-For mock interviews, use a score from 1-5 only at the end:
+如果用户明确要求保留其原始编号，例如跳过第3点，则可以遵循用户编号。否则统一使用以上1到7的结构。
 
-- 5: clear, specific, credible, senior-level signal.
-- 4: solid answer with minor missing detail.
-- 3: acceptable but generic or under-supported.
-- 2: unclear, risky, or missing interviewer signal.
-- 1: likely damaging or non-responsive.
+## 各部分写作要求
 
-## Reference Loading
+### 1. 岗位拆解
 
-Load these files only when relevant:
+这一部分要解释“这个岗位到底是做什么的”。
 
-- `references/behavioral.md` for STAR/CAR stories, leadership, conflict,
-  failure, motivation, and culture-fit answers.
-- `references/technical.md` for software engineering, systems, architecture,
-  debugging, and technical communication interviews.
-- `references/product.md` for product sense, execution, strategy, metrics, and
-  product leadership interviews.
-- `references/data.md` for analytics, SQL, experimentation, metrics, statistics,
-  and data case interviews.
-- `references/recruiter.md` for recruiter screens, career narrative, motivation,
-  compensation, logistics, and closing questions.
+必须包括：
 
-Use `assets/interview-plan-template.md` when the user asks for a reusable plan
-or a written preparation artifact.
+- 岗位一句话理解：用一句话概括岗位的真实目标和价值。
+- 职责拆解：把职责归纳成3到6类能力模块。
+- 任职要求拆解：区分必备条件、加分条件和软性信号。
+- 岗位真实工作内容：推断日常工作、会议、交付物、责任边界和主要压力点。
+- 岗位优点：说明成长空间、业务价值、平台价值、能力积累、曝光度、薪酬潜力或人脉价值。
+- 岗位隐含挑战与难点：识别模糊目标、高工作量、权责不清、跨部门冲突、资源不足、目标激进、技术债、销售压力或晋升受限等风险。
+
+### 2. 匹配度分析
+
+结合岗位说明和候选人背景进行判断。
+
+必须包括：
+
+- 总体匹配度：高匹配、较高匹配、中等匹配、较低匹配或低匹配。
+- 匹配度判断依据。
+- 候选人的优势，并绑定到真实经历。
+- 候选人的劣势和风险。
+- 可以弥补直接经验不足的可迁移能力。
+- 面试中最需要证明的3到5项能力。
+
+除非候选人对岗位核心职责有明确证据，否则不要轻易给出高匹配判断。
+
+### 3. 岗位职业规划建议
+
+这一部分帮助候选人判断这个岗位是否具有长期价值。
+
+必须包括：
+
+- 岗位在市场中的定位。
+- 这个岗位未来1到3年可能通向的职业路径。
+- 它是否强化候选人的目标方向。
+- 它是否可能让候选人陷入过窄职能、弱头衔、低成长路径或不适合的行业。
+- 候选人应该积极应聘、选择性应聘、谨慎谈判还是放弃。
+- 如果候选人要争取这个岗位，需要补足什么能力或证明什么价值。
+
+判断要坦诚。如果岗位不值得应聘，要直接说明原因。
+
+### 4. 面试问题预测
+
+基于以下信息预测面试问题：
+
+- 岗位职责。
+- 任职要求。
+- 候选人简历中的关键表述。
+- 能力缺口或风险点。
+- 岗位级别和业务背景。
+
+按类别输出问题。至少包括：
+
+- 5个简历深挖问题。
+- 5个岗位能力问题。
+- 5个行为面试问题。
+- 3个业务或行业理解问题。
+- 3个压力问题或风险问题。
+
+如果目标岗位属于技术、产品、数据、销售、运营、市场、人力、财务、设计、咨询或管理岗位，需要让问题类型贴合对应职能。
+
+### 5. 面试反问问题：判断这个岗位是不是坑
+
+生成候选人可以反问面试官的问题，用于识别岗位隐藏风险。
+
+需要覆盖：
+
+- 岗位为什么开放。
+- 入职3个月、6个月、12个月的成功标准。
+- 目标是否现实。
+- 团队结构和汇报关系。
+- 决策权和责任边界。
+- 资源支持和跨部门协作。
+- 人员流动、工作强度和紧急程度。
+- 绩效评估方式。
+- 晋升路径。
+- 当前最大的挑战。
+
+对特别有诊断价值的问题标注“重点反问”。
+
+同时说明面试官怎样的回答是积极信号、中性信号或危险信号。
+
+### 6. 面试建议
+
+给出可执行的面试策略。
+
+必须包括：
+
+- 候选人应该如何定位自己。
+- 哪些经历需要重点强调。
+- 哪些短板需要主动处理。
+- 哪些表达应避免或谨慎处理。
+- 需要准备哪些案例。
+- 需要带出哪些数据、成果或证据。
+- 如何收尾面试。
+- 面试前最后30分钟应该复习什么。
+
+### 7. 1-2分钟自我介绍
+
+写一份针对岗位和候选人背景定制的自我介绍。
+
+要求：
+
+- 必须包含中文版本和英文版本。
+- 每个版本控制在口头表达1到2分钟。
+- 必须把候选人背景和目标岗位连接起来。
+- 必须包含简洁的职业叙事。
+- 必须突出2到3个与岗位相关的优势。
+- 不夸大或编造经历。
+- 表达应自然、自信、适合真实面试。
+
+推荐结构：
+
+1. 当前身份或职业背景。
+2. 与岗位最相关的经历。
+3. 匹配岗位的关键优势。
+4. 对这个机会的动机。
+5. 引导面试官继续深挖的结尾。
+
+## 质量标准
+
+最终报告应做到：
+
+- 针对具体岗位和具体候选人。
+- 能直接用于面试准备。
+- 对匹配度和风险保持诚实。
+- 能帮助候选人判断岗位是否值得应聘。
+- 候选人可以直接拿来练习表达。
+- 在鼓励和现实判断之间保持平衡。
+
+避免：
+
+- 泛泛而谈的职业建议。
+- 没有证据支撑的判断。
+- 过长的理论解释。
+- “提升综合能力”这类没有具体含义的空话。
+- 在岗位说明证据不足时，对公司或岗位做过度确定的判断。
+
+## 信息不足时的处理方式
+
+如果岗位说明很短，要谨慎推断，并标注“基于假设”。
+
+如果候选人背景很短，可以要求补充：
+
+- 工作年限。
+- 当前或最近一份工作。
+- 三个最相关项目。
+- 核心技能。
+- 目标职业方向。
+
+如果用户只提供零散要点，也要先产出有用初稿，但需要标注低置信度部分。
+
+## 可选后续模式
+
+完成完整报告后，可以根据用户需要继续提供以下帮助：
+
+- 一题一答式模拟面试。
+- 把自我介绍改得更高级、更简洁、更自然，或更适合英文面试。
+- 制定1天、3天或7天面试准备计划。
+- 为最高风险的行为面试问题撰写结构化回答。
+- 生成面试前最终速查清单。
