@@ -1,0 +1,4 @@
+name: "interview-prep-coach"
+format: "skill-md"
+entrypoint: "../SKILL.md"
+description: "基于岗位说明和候选人背景生成完整面试准备报告。"

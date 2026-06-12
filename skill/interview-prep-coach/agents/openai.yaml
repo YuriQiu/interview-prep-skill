@@ -1,5 +1,4 @@
 interface:
-  display_name: "Interview Prep Coach"
-  short_description: "Plan and practice job interviews"
-  default_prompt: "Use $interview-prep-coach to analyze my resume against a job description and run a mock interview."
-
+  display_name: "面试准备教练"
+  short_description: "基于JD和简历生成面试准备报告"
+  default_prompt: "使用 $interview-prep-coach 基于岗位说明和候选人背景生成一份完整的面试准备报告。"
